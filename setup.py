@@ -5,10 +5,10 @@ with open("README.md", "r") as f:
 
 setup(
     name='megaton_sf',
-    version='0.1.0',
+    version='1.0.0',
     author='Makoto Shimizu',
     author_email='aa.analyst.ga@gmail.com',
-    description='Utilities for Pardot.',
+    description='Python utilities for Pardot API.',
     long_description=readme,
     long_description_content_type='ext/markdown',
     packages=find_packages(),
