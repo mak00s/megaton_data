@@ -8,7 +8,7 @@ def cd(destination_dir: str = None):
     """Changes current directory
         default destination is /tmp or TMP_DIR
     """
-    if destination_dir is None:
+    if not destination_dir:
         destination_dir = os.getenv('TMP_DIR', '/tmp')
 
     os.makedirs(destination_dir, exist_ok=True)

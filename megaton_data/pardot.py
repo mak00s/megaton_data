@@ -199,16 +199,17 @@ class Pardot(object):
 
         return df
 
-    def get_activities(self, by: str = 'updated') -> pd.DataFrame:
+    def get_activities(self, by: str = 'updated', type_: str = "1,2,4,6,11,21") -> pd.DataFrame:
         """Gets Visitor Activities
         """
         if by == 'id':
             # Get Visitor Activities for specific Prospect ID
             df = self._loop_by_ids(method='_query_activities_by_prospect_ids',
-                                   type_="1,2,4,6,11,21")
+                                   type_=type_)
         else:
             # Get all Visitor Activities updated after the date
-            data = self._retry(method='_query_activities')
+            data = self._retry(method='_query_activities',
+                               type_=type_)
             df = pd.json_normalize(data)
 
         return df
