@@ -4,8 +4,8 @@ with open("README.md", "r") as f:
     readme = f.read()
 
 setup(
-    name='megaton_sf',
-    version='1.0.1',
+    name='megaton_data',
+    version='1.0.2',
     author='Makoto Shimizu',
     author_email='aa.analyst.ga@gmail.com',
     description='Python utilities for Pardot API.',
