@@ -6,8 +6,6 @@ import logging
 from pypardot.client import PardotAPI
 import pandas as pd
 
-from . import utils
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -48,6 +46,13 @@ class Pardot(object):
     def set_dates(self, date1: str, date2: str):
         self.date_from = date1
         self.date_to = date2
+
+    def _get_chunked_list(self, original_list: list, chunk_size: int = 500):
+        """Splits a list into chunks"""
+        chunked_list = []
+        for i in range(0, len(original_list), chunk_size):
+            chunked_list.append(original_list[i:i + chunk_size])
+        return chunked_list
 
     def _retry(self, method: str, limit: int = 200, **kwargs):
         """Automatic Paging"""
@@ -153,7 +158,7 @@ class Pardot(object):
         return total, rows
 
     def _loop_by_ids(self, method: str, **kwargs):
-        chunked_list = utils.get_chunked_list(self.prospect_ids, chunk_size=500)
+        chunked_list = self._get_chunked_list(self.prospect_ids, chunk_size=500)
         small_dfs = []
         for items in chunked_list:
             # 対象のprospect_idをカンマ区切りに整形
