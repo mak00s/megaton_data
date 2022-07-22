@@ -25,13 +25,6 @@ class Pardot(object):
         self.prospect_ids = None
         self._client = None
 
-    def authorize(self, key: str, secret: str, refresh_token: str, bu: str):
-        self.consumer_key = key
-        self.consumer_secret = secret
-        self.refresh_token = refresh_token
-        self.business_unit_id = bu
-        return self
-
     @property
     def client(self) -> PardotAPI:
         """Gets or creates an api client"""
@@ -45,12 +38,19 @@ class Pardot(object):
             )
         return self._client
 
+    def authorize(self, key: str, secret: str, refresh_token: str, bu: str):
+        self.consumer_key = key
+        self.consumer_secret = secret
+        self.refresh_token = refresh_token
+        self.business_unit_id = bu
+        return self
+
     def set_dates(self, date1: str, date2: str):
         """Sets start date and end date"""
         self.date_from = date1
         self.date_to = date2
 
-    def _retry(self, method: str, limit: int = 200, **kwargs) -> list:
+    def retry(self, method: str, limit: int = 200, **kwargs) -> list:
         """Automatic Paging
 
         Args:
@@ -84,6 +84,20 @@ class Pardot(object):
                 break
 
         return all_rows
+
+    def loop_by_ids(self, method: str, **kwargs) -> pd.DataFrame:
+        """Loop to execute a method
+        """
+        if self.prospect_ids:
+            chunked_list = utils.get_chunked_list(self.prospect_ids, chunk_size=500)
+            small_dfs = []
+            for items in chunked_list:
+                prospect_ids = ",".join(items)
+                data = self.retry(method, prospect_ids=prospect_ids, **kwargs)
+                _df = pd.json_normalize(data)
+                small_dfs.append(_df)
+            df = pd.concat(small_dfs, ignore_index=True)
+            return df
 
     def _query_prospects(self,
                          offset: int,
@@ -166,22 +180,10 @@ class Pardot(object):
         total = response['total_results']
         return total, rows
 
-    def _loop_by_ids(self, method: str, **kwargs) -> pd.DataFrame:
-        if self.prospect_ids:
-            chunked_list = utils.get_chunked_list(self.prospect_ids, chunk_size=500)
-            small_dfs = []
-            for items in chunked_list:
-                # 対象のprospect_idをカンマ区切りに整形
-                prospect_ids = ",".join(items)
-                data = self._retry(method, prospect_ids=prospect_ids, **kwargs)
-                _df = pd.json_normalize(data)
-                small_dfs.append(_df)
-            df = pd.concat(small_dfs, ignore_index=True)
-            return df
-
     def get_active_prospects(self, fields: str) -> pd.DataFrame:
-        """Gets active Prospects """
-        data = self._retry(
+        """Gets active Prospects
+        """
+        data = self.retry(
             method='_query_prospects',
             fields=fields)
         df = pd.json_normalize(data)
@@ -195,7 +197,7 @@ class Pardot(object):
     def get_visits(self) -> pd.DataFrame:
         """Gets Visits for prospects specified
         """
-        df = self._loop_by_ids(method='_query_visits_by_prospect_ids')
+        df = self.loop_by_ids(method='_query_visits_by_prospect_ids')
 
         return df
 
@@ -204,12 +206,12 @@ class Pardot(object):
         """
         if by == 'id':
             # Get Visitor Activities for specific Prospect ID
-            df = self._loop_by_ids(method='_query_activities_by_prospect_ids',
-                                   type_=type_)
+            df = self.loop_by_ids(method='_query_activities_by_prospect_ids',
+                                  type_=type_)
         else:
             # Get all Visitor Activities updated after the date
-            data = self._retry(method='_query_activities',
-                               type_=type_)
+            data = self.retry(method='_query_activities',
+                              type_=type_)
             df = pd.json_normalize(data)
 
         return df
