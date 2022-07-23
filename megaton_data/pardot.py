@@ -50,14 +50,14 @@ class Pardot(object):
         self.date_from = date1
         self.date_to = date2
 
-    def retry(self, method: str, limit: int = 200, **kwargs) -> list:
+    def retry(self, method: str, limit: int = 200, **kwargs) -> pd.DataFrame:
         """Automatic Paging
 
         Args:
-            method (str): method name to execute
+            method (str): method name to run
             limit (int): max number of items to retrieve in a single request
         Returns:
-            list of dictionary
+            pd.DataFrame
         """
         all_rows = []
         offset = 0
@@ -67,11 +67,12 @@ class Pardot(object):
             retrieved = len(rows)
 
             if offset == 0:
-                logger.debug(f"Found {total} rows.")
+                logger.info(f"Found total {total} rows.")
 
-            num1 = offset + 1
-            num2 = offset + retrieved
-            logger.debug(f"Retrieved rows from {num1} to {num2}.")
+            if retrieved:
+                num1 = offset + 1
+                num2 = offset + retrieved
+                logger.info(f"Retrieved rows #{num1} - {num2}.")
 
             all_rows.extend(rows)
 
@@ -81,26 +82,38 @@ class Pardot(object):
             else:
                 break
 
-        return all_rows
+        if not len(all_rows):
+            logger.warning("No data found.")
+            return pd.DataFrame()
+        else:
+            return pd.json_normalize(all_rows)
 
     def loop_by_ids(self, method: str, **kwargs) -> pd.DataFrame:
         """Loop to execute a method
+
+        Args:
+            method (str): method name to run
+        Returns:
+            pd.DataFrame
         """
+        df = pd.DataFrame()
         if self.prospect_ids:
-            chunked_list = utils.get_chunked_list(self.prospect_ids, chunk_size=500)
+            chunked_list = utils.get_chunked_list(self.prospect_ids, chunk_size=200)
             small_dfs = []
             for items in chunked_list:
                 prospect_ids = ",".join(items)
-                data = self.retry(method, prospect_ids=prospect_ids, **kwargs)
-                _df = pd.json_normalize(data)
+                _df = self.retry(method, prospect_ids=prospect_ids, **kwargs)
                 small_dfs.append(_df)
             df = pd.concat(small_dfs, ignore_index=True)
-            return df
+        else:
+            logger.warning("No prospect_ids found.")
+
+        return df
 
     def _query_prospects(self,
                          offset: int,
                          limit: int = 200,
-                         fields: str = 'id,crm_lead_fid,email,company,campaign,created_at,updated_at'
+                         fields: str = 'id,crm_lead_fid,email,company,campaign,created_at,updated_at',
                          ) -> tuple:
         """Gets Prospects updated during the period
         """
@@ -120,7 +133,7 @@ class Pardot(object):
     def _query_visits_by_prospect_ids(self,
                                       prospect_ids: str,
                                       offset: int,
-                                      limit: int = 200
+                                      limit: int = 200,
                                       ) -> tuple:
         """Gets visits by specified Prospect IDs
         """
@@ -181,14 +194,14 @@ class Pardot(object):
     def get_active_prospects(self, fields: str) -> pd.DataFrame:
         """Gets active Prospects
         """
-        data = self.retry(
-            method='_query_prospects',
-            fields=fields)
-        df = pd.json_normalize(data)
+        df = self.retry(method='_query_prospects', fields=fields)
 
+        # store prospect ids
         if 'id' in df.columns:
             ids = [str(e) for e in df['id'].unique()]
             self.prospect_ids = sorted(ids)
+        else:
+            self.prospect_ids = []
 
         return df
 
@@ -204,12 +217,16 @@ class Pardot(object):
         """
         if by == 'id':
             # Get Visitor Activities for specific Prospect ID
-            df = self.loop_by_ids(method='_query_activities_by_prospect_ids',
-                                  type_=type_)
+            df = self.loop_by_ids(method='_query_activities_by_prospect_ids', type_=type_)
         else:
-            # Get all Visitor Activities updated after the date
-            data = self.retry(method='_query_activities',
-                              type_=type_)
-            df = pd.json_normalize(data)
+            # Get all Visitor Activities updated after the date time specified
+            df = self.retry(method='_query_activities', type_=type_)
+
+            # store prospect ids
+            if 'prospect_id' in df.columns:
+                ids = [str(e) for e in df['prospect_id'].unique()]
+                self.prospect_ids = sorted(ids)
+            else:
+                self.prospect_ids = []
 
         return df
