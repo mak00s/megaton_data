@@ -8,7 +8,7 @@ import pandas as pd
 
 from . import utils
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Pardot(object):
@@ -67,20 +67,18 @@ class Pardot(object):
             retrieved = len(rows)
 
             if offset == 0:
-                print(f"{total} rows found: ", end='')
+                logger.debug(f"Found {total} rows.")
 
             num1 = offset + 1
             num2 = offset + retrieved
-            print(f"{num1}-{num2}", end='')
+            logger.debug(f"Retrieved rows from {num1} to {num2}.")
 
             all_rows.extend(rows)
 
             if offset + limit < total:
                 # continue the loop
                 offset = offset + limit
-                print(", ", end='')
             else:
-                print()
                 break
 
         return all_rows

@@ -18,7 +18,7 @@ def lazy_client() -> pubsub.PublisherClient:
     """
     global PS_CLIENT
     if not PS_CLIENT:
-        logging.debug("...creating Pub/Sub Client")
+        logging.debug("Creating Pub/Sub Client")
         PS_CLIENT = pubsub.PublisherClient()
     return PS_CLIENT
 

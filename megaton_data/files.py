@@ -11,6 +11,6 @@ def cd(destination_dir: str = None):
     if not destination_dir:
         destination_dir = os.getenv('TMP_DIR', '/tmp')
 
+    logging.debug(f"Changing current directory to {destination_dir}")
     os.makedirs(destination_dir, exist_ok=True)
     os.chdir(destination_dir)
-    logging.debug(f"changed current directory to {destination_dir}")
