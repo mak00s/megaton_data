@@ -72,7 +72,7 @@ class Pardot(object):
             if retrieved:
                 num1 = offset + 1
                 num2 = offset + retrieved
-                logger.info(f"Retrieved rows #{num1} - {num2}.")
+                logger.debug(f"Retrieved rows #{num1} - {num2}.")
 
             all_rows.extend(rows)
 
@@ -98,7 +98,7 @@ class Pardot(object):
         """
         df = pd.DataFrame()
         if self.prospect_ids:
-            chunked_list = utils.get_chunked_list(self.prospect_ids, chunk_size=200)
+            chunked_list = utils.get_chunked_list(self.prospect_ids, chunk_size=300)
             small_dfs = []
             for items in chunked_list:
                 prospect_ids = ",".join(items)
