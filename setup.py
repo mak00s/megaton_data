@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name='megaton_data',
-    version='1.0.4',
+    version='1.0.5',
     author='Makoto Shimizu',
     author_email='aa.analyst.ga@gmail.com',
     description='Python utilities for Pardot API.',
