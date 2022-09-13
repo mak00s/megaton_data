@@ -118,10 +118,10 @@ class Pardot(object):
         """Gets Prospects updated during the period
         """
         response = self.client.prospects.query(
-            updated_after=self.date_from,
-            updated_before=self.date_to,
+            created_after=self.date_from,
+            created_before=self.date_to,
             fields=fields,
-            sort_by='updated_at',
+            sort_by='created_at',
             limit=limit,
             offset=offset
         )
@@ -191,7 +191,7 @@ class Pardot(object):
         total = response['total_results']
         return total, rows
 
-    def get_active_prospects(self, fields: str) -> pd.DataFrame:
+    def get_new_prospects(self, fields: str) -> pd.DataFrame:
         """Gets active Prospects
         """
         df = self.retry(method='_query_prospects', fields=fields)
