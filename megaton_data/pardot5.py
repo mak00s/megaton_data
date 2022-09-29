@@ -88,10 +88,9 @@ class Pardot(object):
         self.headers = self._build_auth_header()
         self.date_from = None
         self.date_to = None
-        self.prospects = prospects.Prospects(self)
-        self.prospects = prospects.Prospects(self)
-        self.visits = visits.Visits(self)
-        self.visitoractivities = visitoractivities.VisitorActivities(self)
+        self.prospects = Prospects(self)
+        self.visits = Visits(self)
+        self.visitoractivities = VisitorActivities(self)
 
     def _build_auth_header(self):
         """
