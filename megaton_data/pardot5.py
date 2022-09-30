@@ -128,6 +128,10 @@ class Pardot(object):
         self.date_from = date1
         self.date_to = date2
 
+    def print_debug(self, message: str):
+        if logger.level == DEBUG:
+            print(message, end='')
+
     def get(self, object_name, params=None):
         """
         Makes a GET request to the API. Checks for invalid requests that raise PardotAPIErrors.
@@ -143,20 +147,22 @@ class Pardot(object):
         )
         response = self._check_response(request).json()
         values = response.get('values')
-        print(f"{len(values)} records were retrieved", end='')
+        logger.debug(f"{len(values)} records were retrieved.")
 
         if response['nextPageUrl']:
-            print(", but more", end='')
+            print_debug("More data found. Paging")
             while response['nextPageUrl'] is not None:
-                print(".", end='')
+                print_debug(".")
                 request = requests.get(response['nextPageUrl'], headers=self.headers)
                 response = self._check_response(request).json()
                 values += response.get('values')
-        print()
-        logger.debug(f"Total {len(values)} records were retrieved.")
+            print_debug("\n")
+
         if len(values) == 100000:
             logger.warning("DATA LOSS: The limit of 100,000 records is reached.")
             raise PartialDataReturned
+        else:
+            logger.debug(f"Total {len(values)} records were retrieved.")
 
         return pd.json_normalize(values)
 
