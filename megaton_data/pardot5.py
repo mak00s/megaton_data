@@ -5,7 +5,7 @@ from logging import DEBUG
 
 import pandas as pd
 import requests
-from . import errors, log
+from . import log
 
 BASE_URI = 'https://pi.pardot.com'
 
@@ -121,7 +121,7 @@ class Pardot(object):
             error_type = json.loads(response.text)['error']
             error_description = json.loads(response.text)['error_description']
             message = f"Refresh Token Error (Salesforce API): {error_type} - {error_description}"
-            raise errors.BadRequest(message)
+            raise BadRequest(message)
 
     def set_dates(self, date1: str, date2: str):
         """Sets start date and end date"""
@@ -152,7 +152,7 @@ class Pardot(object):
                 request = requests.get(response['nextPageUrl'], headers=self.headers)
                 response = self._check_response(request).json()
                 values += response.get('values')
-            print()
+        print()
         logger.debug(f"Total {len(values)} records were retrieved.")
         if len(values) == 100000:
             logger.warning("DATA LOSS: The limit of 100,000 records is reached.")
@@ -174,7 +174,7 @@ class Pardot(object):
         if response.status_code != 200:
             json_data = response.json()
             if json_data.get('code'):
-                raise errors.PardotAPIError(json_response=json_data)
+                raise PardotAPIError(json_response=json_data)
             return json_data
         else:
             return response
