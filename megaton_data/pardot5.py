@@ -5,7 +5,7 @@ from logging import DEBUG
 
 import pandas as pd
 import requests
-from megaton_data import log
+from . import errors, log
 
 BASE_URI = 'https://pi.pardot.com'
 
