@@ -156,6 +156,7 @@ class Pardot(object):
         logger.debug(f"Total {len(values)} records were retrieved.")
         if len(values) == 100000:
             logger.warning("DATA LOSS: The limit of 100,000 records is reached.")
+            raise PartialDataReturned
 
         return pd.json_normalize(values)
 
@@ -207,3 +208,10 @@ class PardotAPIError(Error):
 
     def __str__(self):
         return 'Error #{err_code}: {message}'.format(err_code=self.err_code, message=self.message)
+
+
+class PartialDataReturned(Error):
+    """"Partial data was returned from API"""
+
+    def __init__(self, message=None):
+        self.message = message or "The limit of 100,000 records is reached. Partial data was returned from API."
