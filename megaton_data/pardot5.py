@@ -150,13 +150,13 @@ class Pardot(object):
         logger.debug(f"{len(values)} records were retrieved.")
 
         if response['nextPageUrl']:
-            print_debug("More data found. Paging")
+            self.print_debug("More data found. Paging")
             while response['nextPageUrl'] is not None:
-                print_debug(".")
+                self.print_debug(".")
                 request = requests.get(response['nextPageUrl'], headers=self.headers)
                 response = self._check_response(request).json()
                 values += response.get('values')
-            print_debug("\n")
+            self.print_debug("\n")
 
         if len(values) == 100000:
             logger.warning("DATA LOSS: The limit of 100,000 records is reached.")
