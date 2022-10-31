@@ -1,10 +1,12 @@
-import logging
 import os
 import re
+from logging import basicConfig, DEBUG, INFO, WARNING
 from zipfile import ZipFile
 
+from . import log
 
-LOGGER = logging.getLogger(__name__)
+logger = log.Logger(__name__)
+logger.setLevel(INFO)
 
 
 def cd(destination_dir: str = None):
@@ -14,7 +16,7 @@ def cd(destination_dir: str = None):
     if not destination_dir:
         destination_dir = os.getenv('TMP_DIR', '/tmp')
 
-    LOGGER.debug(f"Changing current directory to {destination_dir}")
+    logger.debug(f"Changing current directory to {destination_dir}")
     os.makedirs(destination_dir, exist_ok=True)
     os.chdir(destination_dir)
 
@@ -26,7 +28,7 @@ def save_df_to_file(df, file_path: str):
               mode='a',
               index=False,
               sep='\t')
-    LOGGER.info(f"Data saved to {file_path}.")
+    logger.info(f"Data saved to {file_path}.")
 
 
 def unzip(file):
@@ -40,7 +42,7 @@ def unzip(file):
             # Extract all the contents of zip file in different directory
             zipObj.extractall()
             # shutil.unpack_archive(file)
-            logging.info("Unzipped.")
+            logger.info("Unzipped.")
         return filenames
     else:
         return [file]

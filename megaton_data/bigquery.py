@@ -1,13 +1,16 @@
 """Common helper BigQuery functions"""
 
-import logging
 import os
+from logging import basicConfig, DEBUG, INFO, WARNING
 
 from google.api_core import retry
 from google.cloud import bigquery
 
+from . import log
+
 PROJECT_ID = os.getenv("GCP_PROJECT")
-LOGGER = logging.getLogger(__name__)
+logger = log.Logger(__name__)
+logger.setLevel(INFO)
 
 # Reuse GCP Clients across function invocations using globbals
 # https://cloud.google.com/functions/docs/bestpractices/tips#use_global_variables_to_reuse_objects_in_future_invocations
@@ -29,7 +32,7 @@ def lazy_client() -> bigquery.Client:
 def get_df_from_query(query: str):
     rows_iterable = run_query(query)
     df = rows_iterable.to_dataframe()
-    LOGGER.info(f"{len(df)} rows were retrieved.")
+    logger.info(f"{len(df)} rows were retrieved.")
 
     return df
 
@@ -37,7 +40,7 @@ def get_df_from_query(query: str):
 def run_query(query: str):
     bq_client = lazy_client()
     # Make a API request
-    LOGGER.debug(f"Querying BQ: {query}")
+    logger.debug(f"Querying BQ: {query}")
     query_job = bq_client.query(query)
 
     return query_job.result()  # Waits for query to finish

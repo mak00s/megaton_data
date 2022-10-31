@@ -1,12 +1,15 @@
 """Common helper GCS functions"""
 
-import logging
 import os
+from logging import basicConfig, DEBUG, INFO, WARNING
 
 from google.cloud import storage
 
+from . import log
+
 PROJECT_ID = os.getenv("GCP_PROJECT")
-LOGGER = logging.getLogger(__name__)
+logger = log.Logger(__name__)
+logger.setLevel(INFO)
 
 # Reuse GCP Clients across function invocations using globbals
 # https://cloud.google.com/functions/docs/bestpractices/tips#use_global_variables_to_reuse_objects_in_future_invocations
@@ -18,7 +21,7 @@ def lazy_client() -> storage.Client:
     """
     global CS_CLIENT
     if not CS_CLIENT:
-        logging.debug("Creating Storage Client")
+        logger.debug("Creating Storage Client")
         CS_CLIENT = storage.Client()
     return CS_CLIENT
 
@@ -37,7 +40,7 @@ def upload_object(bucket_name: str, local_path: str, remote_path: str = None) ->
     blob.chunk_size = 1024 * 1024 * 5  # 5MB
 
     try:
-        logging.debug(f"Uploading {local_path} to gs://{bucket_name}/{remote_path}")
+        logger.debug(f"Uploading {local_path} to gs://{bucket_name}/{remote_path}")
         blob.upload_from_filename(local_path, timeout=3600)
     except Exception:
         raise
@@ -52,7 +55,7 @@ def delete_object(bucket_name: str, blob_name: str) -> None:
     client = lazy_client()
     bucket = client.bucket(bucket_name)
     blob = bucket.blob(blob_name)
-    logging.debug(f"Deleting {blob_name} from GCS bucket {bucket_name}.")
+    logger.debug(f"Deleting {blob_name} from GCS bucket {bucket_name}.")
     blob.delete()
 
 
