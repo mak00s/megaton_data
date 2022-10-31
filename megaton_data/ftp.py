@@ -35,7 +35,8 @@ class Connection:
                 timeout=30.0,
                 look_for_keys=False,
                 allow_agent=False,
-                disabled_algorithms=dict(pubkeys=["rsa-sha2-512", "rsa-sha2-256"]))
+                # disabled_algorithms=dict(pubkeys=["rsa-sha2-512", "rsa-sha2-256"])
+            )
             self.sftp = self.client.open_sftp()
             self.is_open = True
             LOGGER.info("Connected.")
