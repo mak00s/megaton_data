@@ -1,9 +1,13 @@
 """Common helper sftp functions"""
+import io
 import logging
 import os
 from urllib.parse import urlparse
 
 import paramiko
+
+from . import files
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -41,15 +45,15 @@ class Connection:
             self.is_open = True
             LOGGER.info("Connected.")
 
-    def list(self, target_dir=None): #, filter_pattern=None):
+    def list(self, target_dir=None, filter_pattern=None):
         if target_dir is None:
             target_dir = self.path
         remote_files = [_files for _files in self.sftp.listdir(path=target_dir)]
-        # if filter_pattern:
-        #     return utils.filter_files(remote_files, filter_pattern)
-        # else:
-        #     return remote_files
-        return remote_files
+        if filter_pattern:
+            return files.filter_files(remote_files, filter_pattern)
+        else:
+            return remote_files
+        # return remote_files
 
     def download(self, filename, local_path=None):
         if local_path is None:
