@@ -8,7 +8,7 @@ from google.cloud import pubsub
 PROJECT_ID = os.getenv("GCP_PROJECT")
 LOGGER = logging.getLogger(__name__)
 
-# Reuse GCP Clients across function invocations using globbals
+# Reuse GCP Clients across function invocations using globals
 # https://cloud.google.com/functions/docs/bestpractices/tips#use_global_variables_to_reuse_objects_in_future_invocations
 PS_CLIENT = None
 
