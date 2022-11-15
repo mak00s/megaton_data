@@ -64,6 +64,23 @@ class Visits(object):
         return self.client.get(object_name='visits', params=params)
 
 
+class CustomRedirects(object):
+    """A class to query and use Pardot custom-redirects.
+    """
+
+    def __init__(self, client):
+        self.client = client
+
+    def query(self, **kwargs):
+        return self._get(params=kwargs)
+
+    def _get(self, params=None):
+        """GET requests for the Visit object."""
+        if params is None:
+            params = {}
+        return self.client.get(object_name='custom-redirects', params=params)
+
+
 class Pardot(object):
     """Class to manage Salesforce Pardot API
     """
@@ -91,6 +108,7 @@ class Pardot(object):
         self.prospects = Prospects(self)
         self.visits = Visits(self)
         self.visitoractivities = VisitorActivities(self)
+        self.customredirects = CustomRedirects(self)
 
     def _build_auth_header(self):
         """
