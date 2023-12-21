@@ -72,11 +72,9 @@ class MegatonGS(object):
 
         try:
             self._driver = self._client.open_by_url(url)
+            title = self._driver.title
         except gspread.exceptions.NoValidUrlKeyFound:
             raise errors.BadUrlFormat
-
-        try:
-            title = self._driver.title
         except RefreshError:
             raise errors.BadCredentialScope
         except gspread.exceptions.APIError as e:
@@ -122,6 +120,7 @@ class MegatonGS(object):
             try:
                 self._driver = self.parent._driver.worksheet(name)
             except gspread.exceptions.WorksheetNotFound:
+                LOGGER.error("Sheet not found.")
                 raise errors.SheetNotFound
             except gspread.exceptions.APIError as e:
                 if 'disabled' in str(e):
