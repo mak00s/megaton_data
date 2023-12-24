@@ -77,6 +77,8 @@ class MegatonGS(object):
             raise errors.BadUrlFormat
         except RefreshError:
             raise errors.BadCredentialScope
+        except gspread.exceptions.SpreadsheetNotFound:
+            raise errors.UrlNotFound
         except gspread.exceptions.APIError as e:
             if 'disabled' in str(e):
                 raise errors.ApiDisabled
