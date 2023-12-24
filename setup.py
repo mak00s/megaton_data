@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name='megaton_data',
-    version='1.2.4',
+    version=__import__('megaton_data').__version__,
     author='Makoto Shimizu',
     author_email='aa.analyst.ga@gmail.com',
     description='Python utilities for GCP and Pardot APIs.',
