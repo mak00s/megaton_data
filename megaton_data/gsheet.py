@@ -244,8 +244,14 @@ class MegatonGS(object):
                 new_rows = df.shape[0]
                 if current_row < next_row + new_rows - 1:
                     LOGGER.debug(f"adding {next_row + new_rows - current_row - 1} rows")
-                    self._driver.add_rows(next_row + new_rows - current_row)
-                    self._refresh()
+                    try:
+                        self._driver.add_rows(next_row + new_rows - current_row)
+                        self._refresh()
+                    except gspread.exceptions.APIError as e:
+                        if 'disabled' in str(e):
+                            raise errors.ApiDisabled
+                        elif 'PERMISSION_DENIED' in str(e):
+                            raise errors.BadPermission
 
                 set_with_dataframe(
                     self._driver,
